@@ -1,0 +1,90 @@
+import { brand } from '@/lib/content/branding';
+
+# Privacy Policy
+
+## Introduction
+
+Welcome to {brand.serviceName}, operated by {brand.legal.entity}, a company incorporated under the laws of the
+{brand.legal.governingLaw}. We respect your privacy and are committed to protecting your personal data.
+
+In this Privacy Policy, the terms "Service," "we," "us," and "Company" refer to {brand.legal.entity}, doing business as
+{brand.serviceName}. The term "you" refers to the user or visitor of our website(s)  and the related services
+provided through {[...new Set([brand.domain, brand.appDomain])].join(" and ")} (collectively, the "Service").
+
+This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services. Please read this policy carefully.
+
+If you have any questions about this Privacy Policy or our practices, please contact us at {brand.emails?.privacy || `privacy@${brand.domain}`}.
+
+For more information on the terms governing your use of the Service, please review our Terms of Service at [https://{brand.domain}/terms](https://{brand.domain}/terms).
+## Information We Collect
+
+### Personal Information
+We collect personal data that you voluntarily provide to us when registering on the platform, such as:
+- Name
+- Email address
+- Billing information
+- Company information (if applicable)
+
+### Automatically Collected Information
+When you access {brand.serviceName}, we may collect information automatically, including:
+- IP address
+- Browser type
+- Operating system
+- Access times
+- Pages viewed directly before and after accessing the website
+
+### Cookies and Tracking Technologies
+We may use cookies, web beacons, and other tracking technologies to help customize the site and improve your experience. You can set your browser to refuse all or some browser cookies or to alert you when cookies are being sent.
+
+## How We Use Your Information
+
+We use your information to:
+- Provide and maintain our services
+- Process your transactions and manage your subscriptions
+- Communicate with you, including sending updates and promotions
+- Improve our services and develop new features
+- Prevent fraud and ensure compliance with legal obligations
+
+## Legal Basis for Processing
+
+Our legal bases for processing your data include:
+- Your consent
+- The fulfillment of a contract
+- Compliance with legal obligations
+- Legitimate interests, such as improving our services and providing customer support
+
+## Disclosure of Your Information
+
+### Service Providers
+
+<p>We may share your information with our service providers, who assist us in delivering our services.
+  These sub-processors include:</p>
+
+<table>
+  <thead>
+  <tr>
+    <th>Sub-Processor</th>
+    <th>Purpose</th>
+    <th>Website</th>
+  </tr>
+  </thead>
+  <tbody>
+  {brand.privacy.services.map((service) => (
+    <tr key={service.legalName}>
+      <td>{service.legalName}</td>
+      <td>{service.purpose}</td>
+      <td><a href={service.website} target="_blank">{service.website}</a></td>
+    </tr>
+  ))}
+  </tbody>
+</table>
+
+### Legal Requirements
+We may disclose your personal data if required to do so by law or in response to valid requests by public authorities.
+
+### Business Transfers
+In the event of a merger, acquisition, or asset sale, your personal data may be transferred.
+
+## Data Retention
+
+We retain your personal data only for as long as is necessary for the purposes set out in this Privacy Policy

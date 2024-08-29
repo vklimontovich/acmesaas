@@ -1,59 +1,58 @@
 import React, { PropsWithChildren } from "react";
 import { ChevronsUpDown, LogOut, Settings, Telescope } from "lucide-react";
-import { getUser, verifyOrgAccess } from "@/lib/server/security-context";
 import Link from "next/link";
-import { assertDefined, requireDefined } from "@/lib/shared/preconditions";
+import { assertDefined } from "@/lib/shared/preconditions";
 import { NavigationButton } from "@/components/navigation-link";
-import { prisma } from "@/lib/server/prisma";
-import { restoreOrgContext } from "@/lib/server/page-context";
+import { restoreTeamContext } from "@/lib/server/team-page-context";
+import { TeamPage } from "@/components/team-page";
 
 const minW = "900px";
 const sidebarW = "200px";
 
-const OrganizationSwitcher: React.FC<{ orgName: string }> = ({ orgName }) => {
+const TeamSwitcher: React.FC<{ teamName: string }> = ({ teamName }) => {
   return (
     <Link
-      href={"/org/list"}
-      className="flex gap-2 justify-between w-full hover:bg-primary-bg-dark rounded-lg px-3 py-2 items-center"
+      href={"/teams"}
+      className="flex gap-2 justify-between w-full hover:bg-background-dark rounded-lg px-3 py-2 items-center"
     >
-      <div className="flex flex-nowrap items-center justify-start gap-2">
-        <div className="bg-primary text-primary-bg-light rounded-xl w-8 h-8 flex justify-center items-center">
-          {orgName[0]}
+      <div className="flex flex-nowrap items-center justify-start gap-2 grow">
+        <div className="bg-primary text-background-light rounded-xl w-8 h-8 flex justify-center items-center">
+          {teamName[0]}
         </div>
         <div className="overflow-ellipsis whitespace-nowrap text-sm">
-          {orgName.length > 10 ? orgName.slice(0, 10 - 3) + "..." : orgName}
+          {teamName.length > 10 ? teamName.slice(0, 10 - 3) + "..." : teamName}
         </div>
       </div>
-      <ChevronsUpDown className={"h-6 w-6 grow"} />
+      <ChevronsUpDown className={"h-6 w-6 shrink"} />
     </Link>
   );
 };
 
-export default async function AppLayout(p: PropsWithChildren<{ params: { org: string } }>) {
+export default async function AppLayout(p: PropsWithChildren<{ params: { teamSlug: string } }>) {
   const {
     children,
-    params: { org: orgSlug },
+    params: { teamSlug },
   } = p;
-  assertDefined(orgSlug, `Organization is not defined`);
-  const context = await restoreOrgContext(orgSlug);
+  assertDefined(teamSlug, `Team is not defined`);
+  const context = await restoreTeamContext(teamSlug);
   (p.params as any).context = context;
   return (
     <main style={{ minWidth: minW, minHeight: "100vh" }} className="flex flex-col justify-start w-full">
-      <section className="grow flex justify-start w-full bg-primary-bg-light">
+      <section className="grow flex justify-start w-full bg-background-light">
         <div className="pr-4 flex items-stretch w-full">
           <nav
-            className="pb-4 border-r bg-primary-bg flex flex-col justify-between h-screen"
+            className="pb-4 border-r bg-background flex flex-col justify-between h-screen"
             style={{ minWidth: sidebarW, width: sidebarW }}
           >
             <div>
               <div className="border-b px-2 py-3 h-20 flex items-center">
-                <OrganizationSwitcher orgName={context.org.name} />
+                <TeamSwitcher teamName={context.team.name} />
               </div>
               <div className="px-3 py-3">
-                <NavigationButton href={`/${orgSlug}`} icon={<Telescope />}>
+                <NavigationButton href={`/${teamSlug}`} icon={<Telescope />}>
                   Overview
                 </NavigationButton>
-                <NavigationButton href={`/${orgSlug}/settings`} icon={<Settings />}>
+                <NavigationButton href={`/${teamSlug}/settings`} icon={<Settings />}>
                   Settings
                 </NavigationButton>
               </div>
@@ -64,7 +63,9 @@ export default async function AppLayout(p: PropsWithChildren<{ params: { org: st
               </Link>
             </div>
           </nav>
-          <main className="flex-1 h-screen overflow-y-auto pl-8 pr-4 py-4">{children}</main>
+          <main className="flex-1 h-screen overflow-y-auto pl-8 pr-4 py-4">
+            <TeamPage context={context}>{children}</TeamPage>
+          </main>
         </div>
       </section>
     </main>

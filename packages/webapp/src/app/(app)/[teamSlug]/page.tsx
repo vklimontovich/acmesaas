@@ -1,6 +1,5 @@
-import { Skeleton } from "antd";
 import { PageContent, PageHeader } from "@/components/page-header";
-import { getPageContext } from "@/lib/server/page-context";
+import { getPageContext } from "@/lib/server/team-page-context";
 
 const DashboardPage: React.FC<{}> = async props => {
   await new Promise(resolve => setTimeout(resolve, 2000));

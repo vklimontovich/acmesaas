@@ -18,3 +18,25 @@ body {
 .debug-border2 {
   border: 1px solid blue;
 }
+
+:root {
+  --color-primary: 55 48 163; /* indigo-800, original: #3730a3 */
+
+  --color-primary-dark: 30 27 75; /* indigo-950, original: #1e1b4b */
+  --color-primary-light: 99 102 241; /* indigo-500, original: #6366f1 */
+  --color-primary-disabled: 165 180 252; /* indigo-300, original: #a5b4fc */
+
+  --color-foreground: 30 41 59; /* slate-800, original: #1e293b */
+
+  --color-foreground-dark: 2 6 23; /* slate-950, original: #020617 */
+  --color-foreground-light: 100 116 139; /* slate-500, original: #64748b */
+  --color-foreground-disabled: 203 213 225; /* slate-300, original: #cbd5e1 */
+
+  --color-background: 248 250 252; /* slate-50, original: #f8fafc */
+  --color-background-dark: 241 245 249; /* slate-100, original: #cbd5e1 */
+  --color-background-light: 255 255 255; /* white */
+
+  --color-foreground-error: 229 62 62; /* original: #e53e3e */
+  --color-foreground-success: 56 161 105; /* original: #38a169 */
+  --color-foreground-warning: 221 107 32; /* original: #dd6b20 */
+}

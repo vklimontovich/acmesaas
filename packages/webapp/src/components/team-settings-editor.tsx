@@ -4,49 +4,51 @@ import Input from "antd/es/input";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { OrganizationSettings } from "@/lib/schema/workspace";
+import { TeamSettings } from "@/lib/schema/team-settings";
 import axios from "axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { CheckCircle, CircleX } from "lucide-react";
 import type { SizeType } from "antd/es/config-provider/SizeContext";
+import { brand } from "@/lib/content/branding";
 
-export const OrganizationSettingsEditor: React.FC<{
+export const TeamSettingsEditor: React.FC<{
   buttonTitle: string;
-  currentSettings?: Partial<OrganizationSettings>;
+  currentSettings?: Partial<TeamSettings>;
   redirect?: boolean;
   size?: SizeType;
   className?: string;
 }> = props => {
-  const {size = "large"} = props;
+  const { size = "large" } = props;
   const params = useSearchParams();
   console.log("params", params);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [successMessage, setSuccessMessage] = useState<string | undefined>(params.has("success") ? "Organization settings saved" : undefined);
+  const [successMessage, setSuccessMessage] = useState<string | undefined>(
+    params.has("success") ? "Team settings saved" : undefined
+  );
 
-  const form = useForm<OrganizationSettings>({
-    resolver: zodResolver(OrganizationSettings),
+  const form = useForm<TeamSettings>({
+    resolver: zodResolver(TeamSettings),
     defaultValues: props.currentSettings,
   });
   const router = useRouter();
-  const onSubmit = async (values: OrganizationSettings) => {
+  const onSubmit = async (values: TeamSettings) => {
     setLoading(true);
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
     try {
-      const result = await axios.post("/api/org", {
+      const result = await axios.post("/api/team", {
         ...values,
-        id: props.currentSettings?.id
+        id: props.currentSettings?.id,
       });
       if (props.redirect) {
         router.push(`/${result.data.slug}`);
       } else {
         router.push(`/${result.data.slug}/settings?success=true`);
-
       }
     } catch (error: any) {
-      console.error("Failed to edit org", error);
+      console.error("Failed to edit team", error);
       setErrorMessage(error.response.data?.message || error.response.data?.error || error.message || "Unknown error");
     } finally {
       setLoading(false);
@@ -59,7 +61,7 @@ export const OrganizationSettingsEditor: React.FC<{
           <div className="flex flex-col gap-2">
             <div>
               <label className="font-bold text-sm" htmlFor="name">
-                Organization Name
+                Team Name
               </label>
               <Controller
                 name="name"
@@ -73,7 +75,7 @@ export const OrganizationSettingsEditor: React.FC<{
             </div>
             <div key="slug">
               <label className="font-bold text-sm mt-4" htmlFor="slug">
-                Organization Slug
+                Team Slug
               </label>
               <Controller
                 name="slug"
@@ -81,7 +83,14 @@ export const OrganizationSettingsEditor: React.FC<{
                 defaultValue=""
                 rules={{ required: "First name is required" }}
                 render={({ field }) => (
-                  <Input {...field} size={size} type="text" placeholder="my-company" className="mt-1 block w-full" />
+                  <Input
+                    addonBefore={`${brand.appDomain}/`}
+                    {...field}
+                    size={size}
+                    type="text"
+                    placeholder="my-company"
+                    className="mt-1 block w-full"
+                  />
                 )}
               />
             </div>
@@ -100,17 +109,17 @@ export const OrganizationSettingsEditor: React.FC<{
               )}
             >
               {errorMessage && (
-                <div className="text-color-error">
+                <div className="text-foreground-error">
                   <CircleX className={"inline w-4 h-4"} /> {errorMessage}
                 </div>
               )}
               {successMessage && (
-                <div className="text-color-success">
+                <div className="text-foreground-success">
                   <CheckCircle className={"inline w-4 h-4"} /> {successMessage}
                 </div>
               )}
               {Object.keys(form.formState.errors).length > 0 && (
-                <div className="text-color-error text-sm flex flex-col gap-0.5">
+                <div className="text-foreground-error text-sm flex flex-col gap-0.5">
                   {Object.entries(form.formState.errors).map(([key, value]) => (
                     <div key={key}>
                       {key}: {value.message}

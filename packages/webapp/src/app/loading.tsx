@@ -1,7 +1,7 @@
-"use client"
+"use client";
+
+import { Loader } from "@/components/loaders";
 
 export default function Loading() {
-  return (
-    "Loading..."
-  );
+  return <Loader />;
 }

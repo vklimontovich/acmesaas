@@ -20,17 +20,17 @@ export const UserContextProps = z.object({
 
 export type UserContext = { user: z.infer<typeof UserContextProps> };
 
-export type PageContext = TeamContext & UserContext;
+export type TeamPageContext = TeamContext & UserContext;
 
-export async function getPageContext(p: any): Promise<PageContext> {
+export async function getPageContext(p: any): Promise<TeamPageContext> {
   if (!p.params.context) {
     p.params.context = await restoreTeamContext(requireDefined(p.params.teamSlug, "Team slug is not defined"));
   }
   const context = requireDefined(p.params.context, "Context is not defined");
-  return context as PageContext;
+  return context as TeamPageContext;
 }
 
-export async function restoreTeamContext(teamSlug: string): Promise<PageContext> {
+export async function restoreTeamContext(teamSlug: string): Promise<TeamPageContext> {
   const _user = requireDefined(await getUser(), `Not authorized`);
   const user = UserContextProps.parse(_user);
   const team = TeamContextProps.parse(

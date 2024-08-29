@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AcmeSaas
 
-## Getting Started
+👉👉👉 See live demo at **[acmesaas.vercel.app](https://acmesaas.vercel.app)**.
 
-First, run the development server:
+AcmeSaas is a minimalistic SaaS boilerplate (or starter kit) built 
+using Typescript, Next.js, Prisma, Antd, etc. See a full list of used
+libraries and tools below.
+
+The goal of the project is to build *minimalistic* template. All dependencies
+are optional and can be replaced with your favorite ones.
+
+## The Stack
+
+* [Next.js](https://nextjs.org) with [App Router](https://nextjs.org/docs/routing/introduction) and [Server Components](https://nextjs.org/docs/server-components/introduction) and TypeScript
+* [NextAuth.js](https://next-auth.js.org) for Authentication (GitHub and Google)
+* [Tailwind CSS](https://tailwindcss.com) for Styling
+* [Prisma](https://www.prisma.io) for ORM
+* [PostgreSQL](https://www.postgresql.org) (should work with MySQL too)
+* [Ant Design](https://ant.design) for UI components.
+    * Why Ant Design? Although it's pretty bloated and looks a little bit outdated, it still has the most complete set of components ready to use.
+* [Stripe](https://stripe.com) for payments
+* [Bun](https://bun.sh) for package management (with monorepo support!)
+
+Other features:
+
+ * Configurable terms of service and privacy policy (use at your own risk, consult a lawyer)
+
+## How to use
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Fill in the `.env` file with your own following the comments in the file. 
+The only required variable is `DATABASE_URL`, also one of `GITHUB_OAUTH_*` or `GOOGLE_OAUTH_*` for oauth
+should be set
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+After env variables are set, run the following commands to create the database and seed it with some data:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+bun prism db push
+```
 
-## Learn More
+To run
 
-To learn more about Next.js, take a look at the following resources:
+```bash 
+bun web:dev # for development
+bun web:start # for prod
+bun web:build # to build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Customization
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You can customize the project to your liking
 
-## Deploy on Vercel
+## Colors
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+TODO
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Branding
+
+TODO
+
