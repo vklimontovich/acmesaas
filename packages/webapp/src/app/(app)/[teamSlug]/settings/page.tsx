@@ -1,18 +1,21 @@
-import { TeamSettingsEditor } from "@/components/team-settings-editor";
+"use client";
 import { PageContent, PageHeader } from "@/components/page-header";
-import { Skeleton, Tabs } from "antd";
-import { ReactNode, Suspense } from "react";
-import { getPageContext } from "@/lib/server/team-page-context";
-import { TeamSettings } from "@/lib/schema/team-settings";
-import { pick } from "lodash";
+import { ReactNode } from "react";
+import { notification, Tabs } from "antd";
+import { BillingSettingsTab } from "@/components/settings/billing-settings-tab";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTeamPageContext } from "@/components/team-page";
+import {  TeamSettings } from "@/lib/schema/team-settings";
+import { ObjectEditorForm } from "@/components/form/object-editor-form";
 import { TeamAccessEditor } from "@/components/team-access-editor";
-import { BillingTab } from "@/components/billing-tab";
+import { brand } from "@/lib/content/branding";
+
 
 const SettingsSection: React.FC<{ title: string; children: React.ReactNode; description: ReactNode }> = ({
-  title,
-  description,
-  children,
-}) => {
+                                                                                                           title,
+                                                                                                           description,
+                                                                                                           children,
+                                                                                                         }) => {
   return (
     <div className="flex flex-row gap-8 border-b border-background-dark mb-6 pb-6 ">
       <div className=" max-w-[300px] w-[300px] min-w-[300px]">
@@ -24,14 +27,33 @@ const SettingsSection: React.FC<{ title: string; children: React.ReactNode; desc
   );
 };
 
-const SettingsPage: React.FC<{ searchParams: any }> = async props => {
-  const { user, team } = await getPageContext(props);
+const useSearchParamUpdater: (() => {
+  updateSearchParam: (name: string, val: any) => void
+}) = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  return {
+    updateSearchParam: (name, val) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, val + "");
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+  };
+};
+
+export default function SettingsPage() {
+  const { updateSearchParam } = useSearchParamUpdater();
+  const searchParams = useSearchParams();
+  const selectedSection = (searchParams.get("section") || "team") as string;
+  const { user, team } = useTeamPageContext();
   return (
     <div>
       <PageHeader description={"Configure your team"}>Settings</PageHeader>
       <PageContent>
         <Tabs
-          defaultActiveKey={props.searchParams.section || "team"}
+          defaultActiveKey={selectedSection}
+          onChange={(key) => updateSearchParam("section", key)}
           items={[
             {
               key: "team",
@@ -40,18 +62,29 @@ const SettingsPage: React.FC<{ searchParams: any }> = async props => {
                 <div>
                   <SettingsSection title="General" description="Change a name and slug for your team">
                     <div className="flex justify-start">
-                      <TeamSettingsEditor
+                      <ObjectEditorForm
+                        apiEndpoint={["/api/team", { teamId: team.id }]}
+                        valuesType={TeamSettings}
                         className="min-w-[500px]"
-                        currentSettings={pick(team, Object.keys(TeamSettings.shape))}
-                        buttonTitle={"Save"}
+                        onSuccess={(val) => {
+                          notification.success({ message: "Settings saved" });
+                          if (val.slug !== team.slug) {
+                            window.history.replaceState({}, "", `/${val.slug}/settings`);
+                            window.location.reload();
+                          }
+                          window.history.replaceState({}, "", `/${val.slug}/settings`);
+                        }}
                         size="middle"
+                        ui={{
+                          fields: {
+                            id: { hidden: true },
+                          },
+                        }}
                       />
                     </div>
                   </SettingsSection>
                   <SettingsSection title="Access" description="Control who can access your team">
-                    <Suspense fallback={<Skeleton title={false} active paragraph={{ rows: 3 }} />}>
-                      <TeamAccessEditor teamId={team.id} userId={user.id} />
-                    </Suspense>
+                    <TeamAccessEditor />
                   </SettingsSection>
                 </div>
               ),
@@ -60,16 +93,12 @@ const SettingsPage: React.FC<{ searchParams: any }> = async props => {
               key: "billing",
               label: "Billing",
               children: (
-                <Suspense fallback={<Skeleton title={false} active paragraph={{ rows: 3 }} />}>
-                  <BillingTab teamId={team.id} />
-                </Suspense>
+                <BillingSettingsTab />
               ),
-            },
+            }
           ]}
         />
       </PageContent>
     </div>
   );
 };
-
-export default SettingsPage;

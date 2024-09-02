@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { omit } from "lodash";
+import { stringifyZodError } from "@/lib/shared/zod-utils";
 
 const dotenv = require("dotenv");
 
@@ -18,6 +19,7 @@ export const ServerEnvVars = z.object({
   SMTP_FROM_NAME: z.string().optional(),
   SMTP_FROM_EMAIL: z.string().optional(),
   STRIPE_WEBHOOK_ORIGIN: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_PRICING_TABLE_ID: z.string().optional(),
   STRIPE_PUBLISHIBLE_KEY: z.string().optional(),
@@ -32,17 +34,7 @@ function parseEnv() {
   }
   const parseResult = ServerEnvVars.safeParse(process.env);
   if (!parseResult.success) {
-    const { errors } = parseResult.error;
-
-    let errorMessage = `❌ Failed to parse env variables. Details:\n`;
-
-    errors.forEach((issue, index) => {
-      errorMessage += `   🚨 ${issue.path.join(" > ") || "unknown"} - ${issue.code}:\n`;
-      errorMessage += `      📝 ${JSON.stringify(omit(issue, "code", "path"))}\n`;
-    });
-
-    console.error(errorMessage);
-
+    console.error(stringifyZodError(parseResult.error, { prefix: "❌ Failed to parse env variables. Details:\n" }));
     throw new Error(`Failed to parse env variables. See details above.`);
   }
   return parseResult.data;

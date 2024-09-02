@@ -1,9 +1,9 @@
 import { getServerAuthSession } from "@/lib/server/next-auth";
 import { cache } from "react";
-import { User } from "@prisma/client";
+import { Membership, Team, User } from "@prisma/client";
 import { prisma } from "@/lib/server/prisma";
 import { requireDefined } from "@/lib/shared/preconditions";
-import { nanoid } from "nanoid";
+import { newId } from "@/lib/shared/id";
 
 async function _getUser(): Promise<User | undefined> {
   //console.debug("Obtaining user from a session for a first time. Subsequent calls will be cached if possible");
@@ -45,7 +45,7 @@ export async function getOrCreateUser(opts: {
   }
   return prisma.user.create({
     data: {
-      id: "usr_" + nanoid(),
+      id: "user_" + newId(),
       provider: opts.provider,
       providerAccountId: opts.providerAccountId,
       email: opts.email,
@@ -62,11 +62,28 @@ export async function verifyTeamAccess(userOrId: User | string, teamId: string, 
       ? requireDefined(await prisma.user.findFirst({ where: { id: userOrId } }), `User ${userOrId} not found`)
       : userOrId;
   const membership = await prisma.membership.findFirst({ where: { userId: user.id, teamId }, select: { role: true } });
-  console.debug(`User ${user.id} has membership ${JSON.stringify(membership)} in team ${teamId}`);
   if (!membership) {
     throw new Error(`User ${user.id} does not have access to team ${teamId}`);
   }
   if (requiredRole && membership.role !== requiredRole) {
     throw new Error(`User ${user.id} does not have required role ${requiredRole} in team ${teamId}`);
   }
+}
+
+export async function verifyAuth(teamId: string): Promise<{ user: User; team: Team; membership: Membership }> {
+  const user = requireDefined(await getUser(), `Not authorized`);
+  const team = requireDefined(
+    await prisma.team.findFirst({ where: { id: teamId, deletedAt: null }, include: { memberships: true } }),
+    `Team ${teamId} not found`
+  );
+  const memberships = team.memberships.filter(m => m.userId === user.id);
+  if (memberships.length === 0) {
+    throw new Error(`User ${user.email} (${user.id}) a member of team ${team.slug} (${team.id})`);
+  }
+  if (memberships.length > 1) {
+    console.warn(`User ${user.email} (${user.id}) has multiple memberships in team ${team.slug} (${team.id})`);
+  }
+  const membership = memberships[0];
+
+  return { user, team, membership };
 }

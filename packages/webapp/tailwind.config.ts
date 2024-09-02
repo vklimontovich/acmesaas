@@ -25,7 +25,7 @@ const config: Config = {
         "foreground-disabled": "rgb(var(--color-foreground-disabled) / <alpha-value>)",
         "foreground-error": "rgb(var(--color-foreground-error) / <alpha-value>)",
         "foreground-warning": "rgb(var(--color-foreground-warning) / <alpha-value>)",
-        "foreground-success": "rgb(var(--foreground-success) / <alpha-value>)",
+        "foreground-success": "rgb(var(--color-foreground-success) / <alpha-value>)",
 
         background: "rgb(var(--color-background) / <alpha-value>)",
         "background-dark": "rgb(var(--color-background-dark) / <alpha-value>)",

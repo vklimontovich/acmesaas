@@ -19,7 +19,6 @@ function hasProduct(s: Stripe.Subscription, productIds: string[]) {
   return false;
 }
 
-const productIds = serverEnv.STRIPE_PRODUCT_IDS?.split(",");
 
 export function getStripe() {
   return new Stripe(requireDefined(serverEnv.STRIPE_SECRET_KEY, `env STRIPE_SECRET_KEY not defined`));

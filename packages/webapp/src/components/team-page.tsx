@@ -1,6 +1,6 @@
 "use client";
-import { TeamPageContext } from "@/lib/server/team-page-context";
 import { createContext, ReactNode, useContext } from "react";
+import { TeamPageContext } from "@/lib/schema/auth-context";
 
 const PageContext0 = createContext<TeamPageContext | undefined>(undefined);
 

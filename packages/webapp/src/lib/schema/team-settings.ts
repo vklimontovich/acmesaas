@@ -7,3 +7,4 @@ export const TeamSettings = z.object({
 });
 
 export type TeamSettings = z.infer<typeof TeamSettings>;
+

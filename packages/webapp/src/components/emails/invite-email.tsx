@@ -96,6 +96,7 @@ const button = {
   display: "inline-block",
   backgroundColor: "#000000",
   color: "#ffffff",
+  fontWeight: "medium",
   padding: "10px 20px",
   borderRadius: "5px",
   textDecoration: "none",

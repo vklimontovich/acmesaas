@@ -1,6 +1,8 @@
 import { ZodType } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { requireDefined } from "@/lib/shared/preconditions";
+import { stringifyZodError } from "@/lib/shared/zod-utils";
 
 export function nextRouteError(status: number, error: string | Error | object) {
   const body =
@@ -37,23 +39,25 @@ export function typedRoute<
   BodyZodType extends ZodType = never,
   ResultZodType extends ZodType = any,
 >(
-  opts: { query?: QueryZodType; body?: BodyZodType; returns?: ResultZodType },
+  opts: { query?: QueryZodType; body?: BodyZodType; returns?: ResultZodType, bodyParser?: (req: NextRequest) => Promise<any> | any },
   callback: (opts: {
     query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never;
     body: BodyZodType extends ZodType<infer BodyType> ? BodyType : never;
+
     req: NextRequest;
     res: NextResponse;
-  }) => ResultZodType extends ZodType<infer ResultType> ? ResultType | Promise<ResultType> : void | Promise<void>
+  }) => ResultZodType extends ZodType<infer ResultType> ? ResultType | Promise<ResultType> : void | Promise<void>,
 ): NextJsRouteHandler {
   return async (req: NextRequest, res: NextResponse) => {
     let query = undefined;
     let body = undefined;
     if (opts.query) {
       const queryObject = Object.fromEntries(req.nextUrl.searchParams.entries());
-      console.log(`Query object: ${JSON.stringify(queryObject)}`);
       const parseResult = opts.query.safeParse(queryObject);
       if (!parseResult.success) {
-        console.error(`Error parsing query of ${req.method} ${req.nextUrl.pathname}: ${parseResult.error.message}`);
+        console.error(
+          `Error parsing query of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(queryObject)}`,
+        );
         return nextRouteError(400, {
           message: "Unable to parse query params",
           details: { zodErrors: parseResult.error },
@@ -62,15 +66,31 @@ export function typedRoute<
       query = parseResult.data;
     }
     if (opts.body) {
-      const bodyJson = await req.json();
-      const parseResult = opts.body.safeParse(bodyJson);
+      const bodyStr = opts.bodyParser ? await opts.bodyParser(req) : await req.json();
+      const parseResult = opts.body.safeParse(bodyStr);
       if (parseResult.error) {
-        console.error(`Error parsing body of ${req.method} ${req.nextUrl.pathname}: ${parseResult.error.message}`);
+        console.error(
+          `Error parsing body of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(bodyStr)}`,
+        );
         return nextRouteError(400, { message: "Unable to parse body", details: { zodErrors: parseResult.error } });
       }
       body = parseResult.data;
     } else if (req.body) {
-      body = await req.json();
+      if (opts.bodyParser) {
+        body = await opts.bodyParser(req);
+      } else {
+        const bodyString = await req.text();
+        if (bodyString) {
+          try {
+            body = JSON.parse(bodyString);
+          } catch (e) {
+            console.error(`Body of ${req.method} ${req.nextUrl.pathname} is not a JSON object: ${bodyString}`, e);
+            return nextRouteError(400, { message: "Unable to parse body", details: { error: e } });
+          }
+        } else {
+          body = undefined;
+        }
+      }
     }
 
     try {
@@ -79,8 +99,9 @@ export function typedRoute<
         const parseResult = opts.returns.safeParse(result);
         if (parseResult.error) {
           console.error(
-            `Error post-processing result of ${req.method} ${req.nextUrl.pathname} - invalid type: ${parseResult.error.message}`
+            `Error parsing result of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(result)}`,
           );
+
           return nextRouteError(500, {
             message: "The route return invalid body",
             details: { zodErrors: parseResult.error },
@@ -90,11 +111,54 @@ export function typedRoute<
       } else if ((result as any) instanceof NextResponse) {
         return result;
       } else if (!res.bodyUsed) {
-        return NextResponse.json(result);
+        return NextResponse.json(result || {ok: true});
       }
     } catch (e: any) {
       console.error(`Error processing ${req.method} ${req.nextUrl.pathname}: ${e?.message || e}`, e);
       return nextRouteError(500, { message: e?.message || "Internal server error" });
     }
   };
+}
+
+
+
+type LooseResult<T> = Promise<T | undefined> | T | undefined;
+
+export function objectEditRoute<
+  ObjectZodType extends ZodType,
+  ReturnType,
+  QueryZodType extends ZodType = never,
+>(opts: {
+    objectType: ObjectZodType,
+    query: QueryZodType,
+    get: (opts: { query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never }) => LooseResult<ObjectZodType extends ZodType<infer BodyType> ? BodyType : never>,
+    del?: (opts: { query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never }) => LooseResult<void>,
+    upsert: (opts: {
+      query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never,
+      body: ObjectZodType extends ZodType<infer BodyType> ? BodyType : never
+    }) => Promise<ReturnType | undefined> | ReturnType | undefined,
+  },
+) {
+  return typedRoute({
+    query: opts.query,
+  }, async ({ body, req, query }) => {
+    if (req.method === "GET") {
+      const result = await opts.get({ query });
+      if (!result) {
+        return new Response(null, {
+          status: 204,
+        });
+      }
+      return opts.objectType.parse(result);
+    } else if (req.method === "DELETE") {
+      return requireDefined(opts.del, `DELETE is not supported`)(query);
+    } else if (req.method === "POST" || req.method === "PUT") {
+      const obj = opts.objectType.parse(body);
+      const result = await opts.upsert({ query, body: obj });
+      //upsert should return an upserted object, eg object with id. Otherwise,
+      //we just return the object we got. Consumer (form) expects the object back
+      //to rerender the form
+      return result || obj;
+    }
+  });
 }

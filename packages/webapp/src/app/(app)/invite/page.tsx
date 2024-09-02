@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/server/prisma";
 import { requireDefined } from "@/lib/shared/preconditions";
 import { SumbitButton } from "@/components/submit-button";
+import Link from "next/link";
 
 export default async function InvitationPage({ searchParams }: { searchParams: any }) {
   const user = await getUser();
@@ -11,7 +12,7 @@ export default async function InvitationPage({ searchParams }: { searchParams: a
     throw new Error("Invitation code not set");
   }
   if (!user) {
-    return redirect(`/auth?redirect=${encodeURIComponent(`/invite?code=${code}`)}&fromInvitation=true`);
+    return redirect(`/signin?redirect=${encodeURIComponent(`/invite?code=${code}`)}&fromInvitation=true`);
   }
 
   const invitation = requireDefined(
@@ -64,6 +65,7 @@ export default async function InvitationPage({ searchParams }: { searchParams: a
           </SumbitButton>
         </form>
       </div>
+      <Link className="block mt-2 text-foreground-light text-sm underline" href="/logout">Logout</Link>
     </div>
   );
 }

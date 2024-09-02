@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "web:dev": "bun run --env-file .env --filter ./packages/webapp dev",
+    "email:dev": "bun run --env-file .env --filter ./packages/webapp email-dev",
     "web:start": "bun run --env-file .env --filter ./packages/webapp start",
     "build": "bun run  --filter=* build",
     "lint": "bun run  --filter=* lint",

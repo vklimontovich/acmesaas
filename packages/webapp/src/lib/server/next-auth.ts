@@ -54,7 +54,7 @@ export const getNextAuthOptions: () => NextAuthOptions = () => {
       },
       jwt: async jwtProps => {
         if (jwtProps.token.internalId) {
-          console.debug(`JWT token already has internalId ${jwtProps.token.internalId}. Skipping user lookup.`);
+          //There's already a user id in the token, so we don't need to look up the user
           return jwtProps.token;
         } else {
           const provider = jwtProps.account?.provider;

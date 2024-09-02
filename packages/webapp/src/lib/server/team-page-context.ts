@@ -2,25 +2,8 @@ import { requireDefined } from "@/lib/shared/preconditions";
 import { getUser, verifyTeamAccess } from "@/lib/server/security-context";
 import { prisma } from "@/lib/server/prisma";
 import { z } from "zod";
+import { TeamContextProps, TeamPageContext, UserContextProps } from "@/lib/schema/auth-context";
 
-export const TeamContextProps = z.object({
-  id: z.string(),
-  name: z.string(),
-  slug: z.string(),
-});
-export type TeamContext = {
-  team: z.infer<typeof TeamContextProps>;
-};
-
-export const UserContextProps = z.object({
-  id: z.string(),
-  email: z.string(),
-  name: z.string(),
-});
-
-export type UserContext = { user: z.infer<typeof UserContextProps> };
-
-export type TeamPageContext = TeamContext & UserContext;
 
 export async function getPageContext(p: any): Promise<TeamPageContext> {
   if (!p.params.context) {

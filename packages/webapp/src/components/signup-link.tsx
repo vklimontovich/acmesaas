@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import axios from "axios";
-import { UserContext } from "@/lib/server/team-page-context";
+import { UserContext } from "@/lib/schema/auth-context";
 
 export const AuthConditionalContent: React.FC<
   PropsWithChildren<{
