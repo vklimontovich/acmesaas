@@ -1,21 +1,20 @@
 "use client";
 import { PageContent, PageHeader } from "@/components/page-header";
 import { ReactNode } from "react";
-import { notification, Tabs } from "antd";
+import { Input, notification, Tabs } from "antd";
 import { BillingSettingsTab } from "@/components/settings/billing-settings-tab";
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTeamPageContext } from "@/components/team-page";
-import {  TeamSettings } from "@/lib/schema/team-settings";
+import { TeamSettings } from "@/lib/schema/team-settings";
 import { ObjectEditorForm } from "@/components/form/object-editor-form";
 import { TeamAccessEditor } from "@/components/team-access-editor";
 import { brand } from "@/lib/content/branding";
 
-
 const SettingsSection: React.FC<{ title: string; children: React.ReactNode; description: ReactNode }> = ({
-                                                                                                           title,
-                                                                                                           description,
-                                                                                                           children,
-                                                                                                         }) => {
+  title,
+  description,
+  children,
+}) => {
   return (
     <div className="flex flex-row gap-8 border-b border-background-dark mb-6 pb-6 ">
       <div className=" max-w-[300px] w-[300px] min-w-[300px]">
@@ -27,9 +26,9 @@ const SettingsSection: React.FC<{ title: string; children: React.ReactNode; desc
   );
 };
 
-const useSearchParamUpdater: (() => {
-  updateSearchParam: (name: string, val: any) => void
-}) = () => {
+const useSearchParamUpdater: () => {
+  updateSearchParam: (name: string, val: any) => void;
+} = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -53,7 +52,7 @@ export default function SettingsPage() {
       <PageContent>
         <Tabs
           defaultActiveKey={selectedSection}
-          onChange={(key) => updateSearchParam("section", key)}
+          onChange={key => updateSearchParam("section", key)}
           items={[
             {
               key: "team",
@@ -66,7 +65,7 @@ export default function SettingsPage() {
                         apiEndpoint={["/api/team", { teamId: team.id }]}
                         valuesType={TeamSettings}
                         className="min-w-[500px]"
-                        onSuccess={(val) => {
+                        onSuccess={val => {
                           notification.success({ message: "Settings saved" });
                           if (val.slug !== team.slug) {
                             window.history.replaceState({}, "", `/${val.slug}/settings`);
@@ -78,6 +77,11 @@ export default function SettingsPage() {
                         ui={{
                           fields: {
                             id: { hidden: true },
+                            slug: {
+                              render: ({ field, size }) => (
+                                <Input {...field} size={size} addonBefore={`${brand.appDomain}/`} />
+                              ),
+                            },
                           },
                         }}
                       />
@@ -92,13 +96,11 @@ export default function SettingsPage() {
             {
               key: "billing",
               label: "Billing",
-              children: (
-                <BillingSettingsTab />
-              ),
-            }
+              children: <BillingSettingsTab />,
+            },
           ]}
         />
       </PageContent>
     </div>
   );
-};
+}

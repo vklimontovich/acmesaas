@@ -19,6 +19,7 @@
     "@prisma/client": "5.11.0",
     "@react-email/components": "^0.0.23",
     "@react-email/render": "^1.0.0",
+    "@tanstack/react-query": "^5.54.1",
     "antd": "5.20.3",
     "axios": "^1.7.4",
     "clsx": "^2.1.1",
@@ -37,7 +38,6 @@
     "react-email": "^3.0.1",
     "react-hook-form": "^7.52.2",
     "stripe": "^16.8.0",
-    "swr": "^2.2.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -56,6 +56,7 @@
     "nodemailer": "^6.9.14",
     "postcss": "^8.4.41",
     "prisma": "^5.18.0",
+    "raw-loader": "^4.0.2",
     "tailwindcss": "^3.4.10",
     "type-fest": "^4.25.0",
     "types": "^0.1.1",

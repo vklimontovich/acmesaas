@@ -8,7 +8,10 @@ import { getCurrentSubscription, setupStripeWebhook } from "@/lib/server/stripe"
 import { serverEnv } from "@/lib/server/server-env";
 import Stripe from "stripe";
 
-async function getProduct(stripe: Stripe, productOrId: string | Stripe.Product | Stripe.DeletedProduct): Promise<Stripe.Product> {
+async function getProduct(
+  stripe: Stripe,
+  productOrId: string | Stripe.Product | Stripe.DeletedProduct
+): Promise<Stripe.Product> {
   if (typeof productOrId === "string") {
     return await stripe.products.retrieve(productOrId);
   } else {
@@ -38,7 +41,7 @@ export const GET = typedRoute(
     const user = requireDefined(await getUser(), `Not authenticated`);
     const team = requireDefined(
       await prisma.team.findUnique({ where: { id: query.teamId } }),
-      `Team ${query.teamId} not found`,
+      `Team ${query.teamId} not found`
     );
     await verifyTeamAccess(user, team.id);
 
@@ -54,7 +57,6 @@ export const GET = typedRoute(
       return result;
     }
 
-
     const result: SubscriptionStatus = {
       isFree: false,
       billingEnabled: true,
@@ -62,10 +64,7 @@ export const GET = typedRoute(
       subscription: {
         id: subscription.id,
         product: {
-          name: (
-            (await getProduct(stripe, subscription.items.data[0].price.product)).name
-
-          ),
+          name: (await getProduct(stripe, subscription.items.data[0].price.product)).name,
         },
         expiresAt: new Date(subscription.current_period_end * 1000).toISOString(),
         startedAt: new Date(subscription.start_date * 1000).toISOString(),
@@ -74,5 +73,5 @@ export const GET = typedRoute(
       },
     };
     return result;
-  },
+  }
 );

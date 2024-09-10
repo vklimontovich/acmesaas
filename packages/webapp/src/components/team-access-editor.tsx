@@ -19,7 +19,7 @@ export const InvitationButton: React.FC<{ onSuccess: (invited: TeamAccessEntry) 
       const {
         data: { code, id },
       } = await axios.post("/api/team/members", { email, teamId: team.id });
-      props.onSuccess({ email, status: "invited", invitationCode: code, invitationId: id, invitedByUserId: user.id  });
+      props.onSuccess({ email, status: "invited", invitationCode: code, invitationId: id, invitedByUserId: user.id });
     } catch (error) {
       console.error("Failed to invite user", error);
       notification.error({ message: "Failed to invite user" });
@@ -138,11 +138,10 @@ export const TeamAccessEditor: React.FC<{}> = props => {
   }, [team?.id]);
 
   if (loading) {
-    return <Skeleton title={false} active paragraph={{ rows: 3, width: "100%" }} />
+    return <Skeleton title={false} active paragraph={{ rows: 3, width: "100%" }} />;
   } else if (error) {
-    return <InlineError error={error} title="Can't load the form" />
+    return <InlineError error={error} title="Can't load the form" />;
   }
-
 
   return (
     <div>

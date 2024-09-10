@@ -65,7 +65,9 @@ export default async function InvitationPage({ searchParams }: { searchParams: a
           </SumbitButton>
         </form>
       </div>
-      <Link className="block mt-2 text-foreground-light text-sm underline" href="/logout">Logout</Link>
+      <Link className="block mt-2 text-foreground-light text-sm underline" href="/logout">
+        Logout
+      </Link>
     </div>
   );
 }

@@ -10,6 +10,10 @@ const nextConfig = {
       /** @type {import("@mdx-js/loader").Options} */
       options: {},
     });
+    config.module.rules.push({
+      test: /\.sql$/,
+      use: "raw-loader",
+    });
     return config;
   },
 };

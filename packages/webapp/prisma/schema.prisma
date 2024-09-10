@@ -9,57 +9,56 @@ generator client {
 }
 
 model User {
-  id                String            @id @default(cuid())
+  id                String           @id @default(cuid())
   name              String?
-  email             String            @unique
+  email             String           @unique
   image             String?
   sessions          Session[]
-  admin             Boolean?          @default(false)
+  admin             Boolean?         @default(false)
   provider          String
   providerAccountId String
   memberships       Membership[]
-  invitationsSent   TeamInvitation[]  @relation("InvitationsSent")
-  invitationsUsed   TeamInvitation[]  @relation("InvitationsUsed")
+  invitationsSent   TeamInvitation[] @relation("InvitationsSent")
+  invitationsUsed   TeamInvitation[] @relation("InvitationsUsed")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Team {
-  id          String           @id @default(cuid())
-  name        String
-  slug        String           @unique
-  memberships Membership[]
-  settings    TeamSettings[]
-  invitations TeamInvitation[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  deletedAt   DateTime?
-  billing     TeamBilling?
+  id           String           @id @default(cuid())
+  name         String
+  slug         String           @unique
+  memberships  Membership[]
+  settings     TeamSettings[]
+  invitations  TeamInvitation[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
+  billing      TeamBilling?
 }
 
 model TeamBilling {
-	id		  String           @id @default(cuid())
-	teamId	  String @unique
-	team	  Team             @relation(fields: [teamId], references: [id])
-	stripeCustomerId String
-	stripeSubscriptionId String
+  id                   String @id @default(cuid())
+  teamId               String @unique
+  team                 Team   @relation(fields: [teamId], references: [id])
+  stripeCustomerId     String
+  stripeSubscriptionId String
 }
 
 model TeamInvitation {
-  id               String  @id @default(cuid())
-  email            String
-  code             String
-  invitedByUserId  String
-  usedByUserId     String?
-  teamId           String
-  invitedByUser    User    @relation("InvitationsSent", fields: [invitedByUserId], references: [id])
-  usedByUser       User?   @relation("InvitationsUsed", fields: [usedByUserId], references: [id])
-  team             Team    @relation(fields: [teamId], references: [id])
+  id              String  @id @default(cuid())
+  email           String
+  code            String
+  invitedByUserId String
+  usedByUserId    String?
+  teamId          String
+  invitedByUser   User    @relation("InvitationsSent", fields: [invitedByUserId], references: [id])
+  usedByUser      User?   @relation("InvitationsUsed", fields: [usedByUserId], references: [id])
+  team            Team    @relation(fields: [teamId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
 
 model Membership {
@@ -72,6 +71,7 @@ model Membership {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@unique([userId, teamId])
   @@index([userId, teamId])
 }
@@ -86,13 +86,12 @@ model Session {
   updatedAt DateTime @updatedAt
 }
 
-
 model TeamSettings {
   id     String @id @default(cuid())
   teamId String
   team   Team   @relation(fields: [teamId], references: [id])
   name   String
-  value   Json
+  value  Json
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -100,3 +99,4 @@ model TeamSettings {
   @@unique([teamId, name])
   @@index([teamId, name])
 }
+

@@ -9,17 +9,6 @@ export function getStripeId(obj: string | { id: string }) {
   return typeof obj === "string" ? obj : obj.id;
 }
 
-function hasProduct(s: Stripe.Subscription, productIds: string[]) {
-  for (const item of s.items.data) {
-    const productId = getStripeId(item.price.product);
-    if (productIds.includes(productId)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-
 export function getStripe() {
   return new Stripe(requireDefined(serverEnv.STRIPE_SECRET_KEY, `env STRIPE_SECRET_KEY not defined`));
 }

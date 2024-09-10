@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { ChevronsUpDown, LogOut, Settings, Telescope } from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings, Telescope, Unplug } from "lucide-react";
 import Link from "next/link";
 import { assertDefined } from "@/lib/shared/preconditions";
 import { NavigationButton } from "@/components/navigation-link";

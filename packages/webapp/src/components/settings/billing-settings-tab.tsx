@@ -16,7 +16,8 @@ export const BillingSettingsTab: React.FC<{}> = p => {
   const [subscriptionStatus, setSubscriptionStatus] = React.useState<SubscriptionStatus | undefined>();
   const { team } = useTeamPageContext();
   useEffect(() => {
-    axios.get(`/api/billing?teamId=${team.id}`)
+    axios
+      .get(`/api/billing?teamId=${team.id}`)
       .then(data => setSubscriptionStatus(data.data))
       .catch(e => setError(e))
       .finally(() => setLoading(false));
@@ -40,7 +41,9 @@ export const BillingSettingsTab: React.FC<{}> = p => {
                 <div
                   className={clsx(
                     "",
-                    subscriptionStatus.subscription.cancelsAtPeriodEnd ? "text-foreground-warning font-bold" : "text-foreground-light",
+                    subscriptionStatus.subscription.cancelsAtPeriodEnd
+                      ? "text-foreground-warning font-bold"
+                      : "text-foreground-light"
                   )}
                 >
                   {subscriptionStatus.subscription.cancelsAtPeriodEnd ? "Cancels on" : "Renews on"}
@@ -66,12 +69,14 @@ export const BillingSettingsTab: React.FC<{}> = p => {
             </div>
           </div>
           <div className="flex justify-end pt-4 mr-2 ">
-            {!subscriptionStatus.subscription.cancelsAtPeriodEnd && <Link
-              href={`/api/billing/link?teamId=${team.id}&type=subscription_cancel`}
-              className="text-sm flex flex-nowrap gap-1 items-center text-foreground-error"
-            >
-              <Ban className="w-3.5 h-3.5" /> Cancel Subscription
-            </Link>}
+            {!subscriptionStatus.subscription.cancelsAtPeriodEnd && (
+              <Link
+                href={`/api/billing/link?teamId=${team.id}&type=subscription_cancel`}
+                className="text-sm flex flex-nowrap gap-1 items-center text-foreground-error"
+              >
+                <Ban className="w-3.5 h-3.5" /> Cancel Subscription
+              </Link>
+            )}
           </div>
         </div>
       );
@@ -91,26 +96,26 @@ export const BillingSettingsTab: React.FC<{}> = p => {
         </div>
       </div>
     );
-
   }
-  return <div>
-    <div className="border border-background-dark rounded-b">
-      <div className="mx-6 py-4 border-b border-background-dark flex justify-between items-center">
-        <h2 className="text-2xl font-bold">
-          Your are on the FREE Plan
-        </h2>
-      </div>
-      <div className="flex flex-col gap-2 mx-6 py-4">
-        <p className="text-center text-xl text-foreground-light my-6">
-          Please upgrade to a paid plan to unlock more features.
-        </p>
-        <div className="border py-12 px-4 rounded">
-          <StripePricingTable pricingTableId={subscriptionStatus.stripeSettings.pricingTable} publishableKey={subscriptionStatus.stripeSettings.publishableKey} teamId={team.id} />
+  return (
+    <div>
+      <div className="border border-background-dark rounded-b">
+        <div className="mx-6 py-4 border-b border-background-dark flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Your are on the FREE Plan</h2>
         </div>
-
+        <div className="flex flex-col gap-2 mx-6 py-4">
+          <p className="text-center text-xl text-foreground-light my-6">
+            Please upgrade to a paid plan to unlock more features.
+          </p>
+          <div className="border py-12 px-4 rounded">
+            <StripePricingTable
+              pricingTableId={subscriptionStatus.stripeSettings.pricingTable}
+              publishableKey={subscriptionStatus.stripeSettings.publishableKey}
+              teamId={team.id}
+            />
+          </div>
+        </div>
       </div>
     </div>
-  </div>;
-
-
+  );
 };

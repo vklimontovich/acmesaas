@@ -3,6 +3,8 @@ import { TeamSettings } from "@/lib/schema/team-settings";
 import clsx from "clsx";
 import type { SizeType } from "antd/es/config-provider/SizeContext";
 import { ObjectEditorForm } from "@/components/form/object-editor-form";
+import { Input } from "antd";
+import { brand } from "@/lib/content/branding";
 
 export const TeamSettingsEditor: React.FC<{
   buttonTitle: string;
@@ -22,7 +24,12 @@ export const TeamSettingsEditor: React.FC<{
         size={size}
         ui={{
           fields: {
-            id: { hidden: true },
+            id: {
+              hidden: true,
+            },
+            slug: {
+              render: ({ field, size }) => <Input {...field} size={size} addonBefore={`${brand.appDomain}/`} />,
+            },
           },
         }}
       />

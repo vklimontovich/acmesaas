@@ -41,7 +41,7 @@ export const POST = typedRoute(
       plainText: InviteEmail.plainText(emailProps),
     });
     return { code, id };
-  },
+  }
 );
 
 export const DELETE = typedRoute(
@@ -57,55 +57,58 @@ export const DELETE = typedRoute(
     if (query.invitationId) {
       const invitation = requireDefined(
         await prisma.teamInvitation.findFirst({ where: { id: query.invitationId, usedByUserId: null } }),
-        `Invitation ${query.invitationId} not found`,
+        `Invitation ${query.invitationId} not found`
       );
       const team = requireDefined(
         await prisma.team.findFirst({ where: { id: invitation.teamId } }),
-        `Team ${invitation.teamId} not found`,
+        `Team ${invitation.teamId} not found`
       );
       await verifyTeamAccess(user, team.id);
       await prisma.teamInvitation.delete({ where: { id: invitation.id } });
     } else if (query.userId) {
       await verifyTeamAccess(user, query.teamId);
       await prisma.membership.deleteMany({
-        where: { teamId: query.teamId, userId:  query.userId},
+        where: { teamId: query.teamId, userId: query.userId },
       });
     } else {
       throw new Error(`userId or invitationId should be set`);
     }
-  },
+    return { ok: true };
+  }
 );
 
-export const GET = typedRoute({
-  query: z.object({
-    teamId: z.string(),
-  }),
-  returns: z.array(TeamAccessEntry),
-}, async ({ query }) => {
-  await verifyAuth(query.teamId);
+export const GET = typedRoute(
+  {
+    query: z.object({
+      teamId: z.string(),
+    }),
+    returns: z.array(TeamAccessEntry),
+  },
+  async ({ query }) => {
+    await verifyAuth(query.teamId);
 
-  const users = await prisma.user.findMany({ where: { memberships: { some: { teamId: query.teamId } } } });
-  const invitations = await prisma.teamInvitation.findMany({ where: { teamId: query.teamId, usedByUserId: null } });
-  const rows: TeamAccessEntry[] = [
-    ...users.map(
-      u =>
-        ({
-          status: "active",
-          email: u.email,
-          userId: u.id,
-        }) as TeamAccessEntry,
-    ),
-    ...invitations.map(
-      i =>
-        ({
-          status: "invited",
-          email: i.email,
-          invitationCode: i.code,
-          invitationId: i.id,
-          invitedByUserId: i.invitedByUserId,
-        }) as TeamAccessEntry,
-    ),
-  ];
-  return rows;
-
-});
+    const users = await prisma.user.findMany({ where: { memberships: { some: { teamId: query.teamId } } } });
+    const invitations = await prisma.teamInvitation.findMany({ where: { teamId: query.teamId, usedByUserId: null } });
+    const rows: TeamAccessEntry[] = [
+      ...users.map(
+        u =>
+          ({
+            status: "active",
+            email: u.email,
+            userId: u.id,
+          }) as TeamAccessEntry
+      ),
+      ...invitations.map(
+        i =>
+          ({
+            status: "invited",
+            email: i.email,
+            invitationCode: i.code,
+            invitationId: i.id,
+            invitedByUserId: i.invitedByUserId,
+          }) as TeamAccessEntry
+      ),
+    ];
+    return rows;
+  }
+);

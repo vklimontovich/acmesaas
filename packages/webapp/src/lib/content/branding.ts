@@ -1,6 +1,6 @@
 export const brand = {
   serviceName: "AcmeSaas",
-  serviceDescription: "",
+  serviceDescription: "Revenue re",
   domain: "acmesaas.com",
   appDomain: "app.acme.com",
 

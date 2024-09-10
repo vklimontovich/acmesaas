@@ -8,7 +8,6 @@ import { z } from "zod";
 import { getPageContext } from "@/lib/server/team-page-context";
 import { newId } from "@/lib/shared/id";
 
-
 const handler = objectEditRoute({
   objectType: TeamSettings,
   query: z.object({
@@ -23,7 +22,10 @@ const handler = objectEditRoute({
   },
   upsert: async ({ body, query }) => {
     const teamId = body.id || query.teamId;
-    assertDefined(!body.id || !query.teamId || body.id === query.teamId, `Team id is different in the query and body. Specified: ${query.teamId}, body: ${body.id}. They should be the same, or you should use just one approach¬`);
+    assertDefined(
+      !body.id || !query.teamId || body.id === query.teamId,
+      `Team id is different in the query and body. Specified: ${query.teamId}, body: ${body.id}. They should be the same, or you should use just one approach¬`
+    );
     if (teamId) {
       const { team } = await verifyAuth(teamId);
       return prisma.team.update({

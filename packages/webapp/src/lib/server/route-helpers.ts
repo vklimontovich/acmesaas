@@ -32,45 +32,61 @@ export function getOrigin() {
   return `${protocol}://${host}${port}`;
 }
 
-type NextJsRouteHandler = (req: NextRequest, res: NextResponse) => void | Response | Promise<void | Response>;
+type NextJsRouteHandler = (
+  req: NextRequest,
+  context: {
+    params: { id: string };
+    searchParams: URLSearchParams;
+    previewData?: any;
+    cookies: any;
+  }
+) => void | Response | Promise<void | Response>;
 
 export function typedRoute<
   QueryZodType extends ZodType = never,
   BodyZodType extends ZodType = never,
   ResultZodType extends ZodType = any,
 >(
-  opts: { query?: QueryZodType; body?: BodyZodType; returns?: ResultZodType, bodyParser?: (req: NextRequest) => Promise<any> | any },
+  opts: {
+    query?: QueryZodType;
+    body?: BodyZodType;
+    returns?: ResultZodType;
+    bodyParser?: (req: NextRequest) => Promise<any> | any;
+  },
   callback: (opts: {
-    query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never;
+    query: QueryZodType extends ZodType<infer QueryType> ? QueryType : any;
     body: BodyZodType extends ZodType<infer BodyType> ? BodyType : never;
 
     req: NextRequest;
-    res: NextResponse;
-  }) => ResultZodType extends ZodType<infer ResultType> ? ResultType | Promise<ResultType> : void | Promise<void>,
+  }) => ResultZodType extends ZodType<infer ResultType> ? ResultType | Promise<ResultType> : void | Promise<void>
 ): NextJsRouteHandler {
-  return async (req: NextRequest, res: NextResponse) => {
+  return async (req: NextRequest, { params }) => {
     let query = undefined;
     let body = undefined;
     if (opts.query) {
-      const queryObject = Object.fromEntries(req.nextUrl.searchParams.entries());
+      const queryObject = Object.fromEntries([...req.nextUrl.searchParams.entries(), ...Object.entries(params || [])]);
       const parseResult = opts.query.safeParse(queryObject);
       if (!parseResult.success) {
         console.error(
-          `Error parsing query of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(queryObject)}`,
+          `Error parsing query of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(queryObject)}`
         );
         return nextRouteError(400, {
-          message: "Unable to parse query params",
+          message: `Unable to parse query params: ?${Object.keys(queryObject)
+            .map(k => `${k}=${queryObject[k]}`)
+            .join("& ")}`,
           details: { zodErrors: parseResult.error },
         });
       }
       query = parseResult.data;
+    } else {
+      query = Object.fromEntries(req.nextUrl.searchParams.entries());
     }
     if (opts.body) {
       const bodyStr = opts.bodyParser ? await opts.bodyParser(req) : await req.json();
       const parseResult = opts.body.safeParse(bodyStr);
       if (parseResult.error) {
         console.error(
-          `Error parsing body of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(bodyStr)}`,
+          `Error parsing body of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(bodyStr)}`
         );
         return nextRouteError(400, { message: "Unable to parse body", details: { zodErrors: parseResult.error } });
       }
@@ -94,12 +110,12 @@ export function typedRoute<
     }
 
     try {
-      const result = await callback({ query: query as any, body: body as any, req, res });
+      const result = await callback({ query: query as any, body: body as any, req });
       if (opts.returns) {
         const parseResult = opts.returns.safeParse(result);
         if (parseResult.error) {
           console.error(
-            `Error parsing result of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(result)}`,
+            `Error parsing result of ${req.method} ${req.nextUrl.pathname}. ${stringifyZodError(parseResult.error, { prefix: "Details:" })}\n. Result: ${JSON.stringify(result)}`
           );
 
           return nextRouteError(500, {
@@ -110,8 +126,8 @@ export function typedRoute<
         return NextResponse.json(parseResult.data);
       } else if ((result as any) instanceof NextResponse) {
         return result;
-      } else if (!res.bodyUsed) {
-        return NextResponse.json(result || {ok: true});
+      } else if (!req.bodyUsed) {
+        return NextResponse.json(result || { ok: true });
       }
     } catch (e: any) {
       console.error(`Error processing ${req.method} ${req.nextUrl.pathname}: ${e?.message || e}`, e);
@@ -120,30 +136,37 @@ export function typedRoute<
   };
 }
 
-
-
 type LooseResult<T> = Promise<T | undefined> | T | undefined;
 
-export function objectEditRoute<
-  ObjectZodType extends ZodType,
-  ReturnType,
-  QueryZodType extends ZodType = never,
->(opts: {
-    objectType: ObjectZodType,
-    query: QueryZodType,
-    get: (opts: { query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never }) => LooseResult<ObjectZodType extends ZodType<infer BodyType> ? BodyType : never>,
-    del?: (opts: { query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never }) => LooseResult<void>,
-    upsert: (opts: {
-      query: QueryZodType extends ZodType<infer QueryType> ? QueryType : never,
-      body: ObjectZodType extends ZodType<infer BodyType> ? BodyType : never
-    }) => Promise<ReturnType | undefined> | ReturnType | undefined,
-  },
-) {
-  return typedRoute({
-    query: opts.query,
-  }, async ({ body, req, query }) => {
+type InferTypeFromZod<QueryZodType extends ZodType = never> =
+  QueryZodType extends ZodType<infer QueryType> ? QueryType : never;
+
+export function objectEditRoute<ObjectZodType extends ZodType, ReturnType, QueryZodType extends ZodType = never>(opts: {
+  objectType: ObjectZodType;
+  query: QueryZodType;
+  get: (opts: {
+    query: InferTypeFromZod<QueryZodType>;
+    rawQuery: Record<string, any>;
+  }) => LooseResult<InferTypeFromZod<ObjectZodType>>;
+  del?: (opts: { query: InferTypeFromZod<QueryZodType>; rawQuery: Record<string, any> }) => LooseResult<void>;
+  list?: (opts: {
+    query: InferTypeFromZod<QueryZodType>;
+  }) => Promise<InferTypeFromZod<ObjectZodType>[]> | InferTypeFromZod<ObjectZodType>[];
+  upsert: (opts: {
+    query: InferTypeFromZod<QueryZodType>;
+    rawQuery: Record<string, any>;
+    body: InferTypeFromZod<ObjectZodType>;
+  }) => Promise<ReturnType | undefined> | ReturnType | undefined;
+}) {
+  return typedRoute({}, async ({ body, req }) => {
+    const rawQuery = Object.fromEntries(req.nextUrl.searchParams.entries());
+    const query = opts.query.parse(rawQuery);
+
     if (req.method === "GET") {
-      const result = await opts.get({ query });
+      if (rawQuery.op === "list") {
+        return requireDefined(opts.list, `listing is not supported`)({ query });
+      }
+      const result = await opts.get({ query, rawQuery });
       if (!result) {
         return new Response(null, {
           status: 204,
@@ -151,10 +174,10 @@ export function objectEditRoute<
       }
       return opts.objectType.parse(result);
     } else if (req.method === "DELETE") {
-      return requireDefined(opts.del, `DELETE is not supported`)(query);
+      return requireDefined(opts.del, `DELETE is not supported`)({ query, rawQuery });
     } else if (req.method === "POST" || req.method === "PUT") {
       const obj = opts.objectType.parse(body);
-      const result = await opts.upsert({ query, body: obj });
+      const result = await opts.upsert({ query, rawQuery, body: obj });
       //upsert should return an upserted object, eg object with id. Otherwise,
       //we just return the object we got. Consumer (form) expects the object back
       //to rerender the form

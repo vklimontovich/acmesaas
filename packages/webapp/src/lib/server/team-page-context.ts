@@ -3,7 +3,7 @@ import { getUser, verifyTeamAccess } from "@/lib/server/security-context";
 import { prisma } from "@/lib/server/prisma";
 import { z } from "zod";
 import { TeamContextProps, TeamPageContext, UserContextProps } from "@/lib/schema/auth-context";
-
+import { headers } from "next/headers";
 
 export async function getPageContext(p: any): Promise<TeamPageContext> {
   if (!p.params.context) {

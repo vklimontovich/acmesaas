@@ -30,18 +30,21 @@ const SignIn: React.FC<{ searchParams: any }> = async ({ searchParams }) => {
       <div className="w-full max-w-md space-y-8 text-center px-4 py-24">
         <h1 className="text-3xl font-bold text-primary">{brand.serviceName}</h1>
         <div className="border border-foreground-disabled rounded p-6 bg-background-light">
-          <h2 className="text-2xl font-semibold text-foreground">{searchParams.fromInvitation ? "Please sign in to accept invitation" : "Welcome back"}</h2>
+          <h2 className="text-2xl font-semibold text-foreground">
+            {searchParams.fromInvitation ? "Please sign in to accept invitation" : "Welcome back"}
+          </h2>
           <p className="mt-1 text-foreground-light font-lighter">Sign in to your account</p>
           {serverEnv.GOOGLE_OAUTH_CLIENT_ID && <AuthButton type="google" className="mt-6" />}
           {serverEnv.GITHUB_CLIENT_ID && <AuthButton type="github" className=" mt-4" />}
           <div className="flex items-center justify-center mt-4 text-sm text-foreground">
             <span>Don{"'"}t have an account?</span>
-            <Link href={
-              {
+            <Link
+              href={{
                 pathname: "/signup",
                 query: searchParams,
-              }
-            } className="ml-1 text-primary hover:underline">
+              }}
+              className="ml-1 text-primary hover:underline"
+            >
               Sign Up
             </Link>
           </div>

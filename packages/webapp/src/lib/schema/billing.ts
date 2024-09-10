@@ -4,7 +4,7 @@ import { Simplify } from "type-fest";
 export const PublishableStripeSettings = z.object({
   publishableKey: z.string(),
   pricingTable: z.string(),
-})
+});
 
 export const SubscriptionStatus = z.union([
   z.object({

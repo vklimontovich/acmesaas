@@ -8,7 +8,7 @@ import { getUser } from "@/lib/server/security-context";
 import { redirect } from "next/navigation";
 import { serverEnv } from "@/lib/server/server-env";
 
-const SignUp: React.FC<{searchParams: any}> = async ({searchParams}) => {
+const SignUp: React.FC<{ searchParams: any }> = async ({ searchParams }) => {
   const user = await getUser();
   if (user) {
     return redirect(searchParams.redirect || "/app");
@@ -33,9 +33,9 @@ const SignUp: React.FC<{searchParams: any}> = async ({searchParams}) => {
       {/* Right Section */}
       <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
         <div className="max-w-md mx-auto w-full space-y-8">
-          <h2 className="text-3xl font-semibold text-foreground text-center">{
-            searchParams.fromInvitation ? "Please sign up to accept invitation" : "Welcome to AcmeCorp"
-          }</h2>
+          <h2 className="text-3xl font-semibold text-foreground text-center">
+            {searchParams.fromInvitation ? "Please sign up to accept invitation" : "Welcome to AcmeCorp"}
+          </h2>
           {serverEnv.GOOGLE_OAUTH_CLIENT_ID && (
             <AuthButton
               type="google"
@@ -63,10 +63,13 @@ const SignUp: React.FC<{searchParams: any}> = async ({searchParams}) => {
           </div>
           <div className="flex items-center justify-center mt-4 text-sm text-foreground">
             <span>Already have an account?</span>
-            <Link href={{
-              pathname: "/signin",
-              query: searchParams
-            }} className="ml-1 text-primary hover:underline">
+            <Link
+              href={{
+                pathname: "/signin",
+                query: searchParams,
+              }}
+              className="ml-1 text-primary hover:underline"
+            >
               Sign In
             </Link>
           </div>

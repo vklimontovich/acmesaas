@@ -14,8 +14,6 @@ export const InvitationResponse = z.object({
 
 export type InvitationResponse = z.infer<typeof InvitationResponse>;
 
-
-
 export const TeamAccessEntry = z.union([
   z.object({
     status: z.literal("invited"),
@@ -34,8 +32,7 @@ export const TeamAccessEntry = z.union([
     invitedByUserId: z.never().optional(),
     invitationCode: z.never().optional(),
     invitationId: z.never().optional(),
-  })
+  }),
 ]);
 
 export type TeamAccessEntry = z.infer<typeof TeamAccessEntry>;
-
