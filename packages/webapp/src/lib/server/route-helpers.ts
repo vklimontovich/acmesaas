@@ -126,7 +126,7 @@ export function typedRoute<
         return NextResponse.json(parseResult.data);
       } else if ((result as any) instanceof NextResponse) {
         return result;
-      } else if (!req.bodyUsed) {
+      } else {
         return NextResponse.json(result || { ok: true });
       }
     } catch (e: any) {

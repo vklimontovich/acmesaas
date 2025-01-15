@@ -6,18 +6,20 @@
     "packages/*"
   ],
   "scripts": {
-    "web:dev": "bun run --env-file .env --filter ./packages/webapp dev",
-    "email:dev": "bun run --env-file .env --filter ./packages/webapp email-dev",
-    "web:start": "bun run --env-file .env --filter ./packages/webapp start",
-    "build": "bun run  --filter=* build",
-    "lint": "bun run  --filter=* lint",
-    "prisma": "bun run --env-file .env --filter ./packages/webapp prisma",
+    "web:dev": "dotenv -e .env -- pnpm run --filter ./packages/webapp dev",
+    "email:dev": "pnpm run --filter ./packages/webapp email-dev",
+    "web:start": "pnpm run --filter ./packages/webapp start",
+    "build": "pnpm run  --filter=* build",
+    "lint": "pnpm run  --filter=* lint",
+    "prisma": "dotenv -e .env  -- pnpm run --filter ./packages/webapp prisma",
     "format:check": "prettier --ignore-unknown --check $(git diff --name-only --diff-filter d | xargs)",
     "format:check:all": "prettier --check .",
     "format": "prettier --ignore-unknown --write $(git diff --name-only --diff-filter d | xargs)",
     "format:all": "prettier --write ."
   },
   "devDependencies": {
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.2",
     "prettier": "^3.3.3"
   }
 }

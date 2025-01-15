@@ -19,7 +19,7 @@ are optional and can be replaced with your favorite ones.
 * [Ant Design](https://ant.design) for UI components.
     * Why Ant Design? Although it's pretty bloated and looks a little bit outdated, it still has the most complete set of components ready to use.
 * [Stripe](https://stripe.com) for payments
-* [Bun](https://bun.sh) for package management (with monorepo support!)
+* `pnpm` for package management (with monorepo support!)
 
 Other features:
 
@@ -45,9 +45,9 @@ bun prism db push
 To run
 
 ```bash 
-bun web:dev # for development
-bun web:start # for prod
-bun web:build # to build
+pnpm web:dev # for development
+pnpm web:start # for prod
+pnpm web:build # to build
 ```
 
 # Customization
